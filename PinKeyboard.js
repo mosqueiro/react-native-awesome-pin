@@ -3,12 +3,14 @@
  * @description Keyboard component with error status bar and interactive keys
  */
 
-import React, { Component } from "react";
-import { View, Image, Text, StyleSheet, Platform } from "react-native";
-import Ripple from "react-native-material-ripple";
-import PropTypes from "prop-types";
+import React, {Component} from 'react';
+import {View, Image, Text, StyleSheet, Platform} from 'react-native';
+import Ripple from 'react-native-material-ripple';
+import PropTypes from 'prop-types';
 
-const backAsset = require("./back.png");
+const backAsset = require('./back.png');
+const backAssetDark = require('./back-dark.png');
+
 
 class PinKeyboard extends Component {
   /**
@@ -24,7 +26,7 @@ class PinKeyboard extends Component {
 
     this.state = {
       disabled: false,
-      error: null
+      error: null,
     };
   }
 
@@ -52,30 +54,33 @@ class PinKeyboard extends Component {
    * Allows us to render JSX to the screen
    */
   render() {
-    /** Styles */
-    const { containerStyle, keyboardDefaultStyle, keyboardRowStyle } = styles;
     /** Props */
     const {
       keyboard,
-      // Style Props
-      keyboardStyle
+      // Style Props,
+      // darkMode,
+      keyboardStyle,
     } = this.props;
+    
+    /** Styles */
+    // const selectedStyle = darkMode ? stylesDark : styles;
+    const {containerStyle, keyboardDefaultStyle, keyboardRowStyle} = styles;
 
     return (
       <View style={containerStyle}>
         {this.renderError()}
         <View style={[keyboardDefaultStyle, keyboardStyle]}>
           {// Maps each array of numbers in the keyboardValues array
-            keyboard.map((row, r) => {
-              return (
-                <View key={r} style={keyboardRowStyle}>
-                  {// Maps each number in row and creates key for that number
-                    row.map((element, k) => {
-                      return this.renderKey(element, r, k);
-                    })}
-                </View>
-              );
-            })}
+          keyboard.map((row, r) => {
+            return (
+              <View key={r} style={keyboardRowStyle}>
+                {// Maps each number in row and creates key for that number
+                row.map((element, k) => {
+                  return this.renderKey(element, r, k);
+                })}
+              </View>
+            );
+          })}
         </View>
       </View>
     );
@@ -88,17 +93,17 @@ class PinKeyboard extends Component {
    */
   renderError() {
     // Styles
-    const { errorDefaultStyle, errorTextDefaultStyle } = styles;
+    const {errorDefaultStyle, errorTextDefaultStyle} = styles;
 
     // Props
     const {
       // Style Props
       errorStyle,
-      errorTextStyle
+      errorTextStyle,
     } = this.props;
 
     // State
-    const { error } = this.state;
+    const {error} = this.state;
 
     if (error) {
       return (
@@ -121,40 +126,43 @@ class PinKeyboard extends Component {
    * @return {jsx}
    */
   renderKey(entity, row, column) {
-    /** Styles */
-    const {
-      keyContainerStyle,
-      keyboardDisabledDefaultStyle,
-      keyDefaultStyle,
-      keyTextDefaultStyle,
-      keyImageDefaultStyle
-    } = styles;
     /** Props */
     const {
       keyDown,
       keyboardFunc,
       keyboardDisabledStyle,
+      darkMode,
       // Style Props
       keyStyle,
       keyTextStyle,
-      keyImageStyle
+      keyImageStyle,
     } = this.props;
+
+    /** Styles */
+    const selectedStyle = darkMode ? stylesDark : styles;
+    const {
+      keyContainerStyle,
+      keyboardDisabledDefaultStyle,
+      keyImageDefaultStyle,
+    } = styles;
+    const {keyDefaultStyle,keyTextDefaultStyle} = selectedStyle;
+
     /** State */
-    const { disabled } = this.state;
+    const {disabled} = this.state;
 
     // Custom functions for the keyboard key
     const keyboardFuncSet = keyboardFunc
       ? keyboardFunc
       : [
-        [null, null, null],
-        [null, null, null],
-        [null, null, null],
-        [null, 0, () => this.props.keyDown("back")]
-      ];
+          [null, null, null],
+          [null, null, null],
+          [null, null, null],
+          [null, 0, () => this.props.keyDown('back')],
+        ];
 
     // Decide if the element passed as the key is text
     const keyJsx = keyboardFuncSet[row][column] ? (
-      <Image style={[keyImageDefaultStyle, keyImageStyle]} source={entity} />
+      <Image style={[keyImageDefaultStyle, keyImageStyle]} source={darkMode ? backAssetDark : backAsset} />
     ) : (
       <Text style={[keyTextDefaultStyle, keyTextStyle]}>{entity}</Text>
     );
@@ -163,15 +171,14 @@ class PinKeyboard extends Component {
     if (!disabled) {
       return (
         <Ripple
-          rippleColor={"#000"}
+          rippleColor={'#000'}
           key={column}
           onPressIn={() =>
             keyboardFuncSet[row][column]
               ? keyboardFuncSet[row][column]()
               : keyDown(entity)
           }
-          style={[keyContainerStyle, keyDefaultStyle, keyStyle]}
-        >
+          style={[keyContainerStyle, keyDefaultStyle, keyStyle]}>
           {keyJsx}
         </Ripple>
       );
@@ -184,9 +191,8 @@ class PinKeyboard extends Component {
             keyDefaultStyle,
             keyStyle,
             keyboardDisabledDefaultStyle,
-            keyboardDisabledStyle
-          ]}
-        >
+            keyboardDisabledStyle,
+          ]}>
           {keyJsx}
         </View>
       );
@@ -200,7 +206,7 @@ class PinKeyboard extends Component {
    */
   throwError(error) {
     this.setState({
-      error
+      error,
     });
   }
 
@@ -208,7 +214,7 @@ class PinKeyboard extends Component {
    * Function used to clear the error on the keyboard
    */
   clearError() {
-    this.setState({ error: null });
+    this.setState({error: null});
   }
 
   /**
@@ -216,7 +222,7 @@ class PinKeyboard extends Component {
    */
   disable() {
     this.setState({
-      disabled: true
+      disabled: true,
     });
   }
 
@@ -225,7 +231,7 @@ class PinKeyboard extends Component {
    */
   enable() {
     this.setState({
-      disabled: false
+      disabled: false,
     });
   }
 }
@@ -235,6 +241,7 @@ PinKeyboard.propTypes = {
   keyDown: PropTypes.func.isRequired,
   keyboard: PropTypes.array,
   keyboardFunc: PropTypes.array,
+  darkMode: PropTypes.bool,
   // Style props
   keyboardStyle: PropTypes.object,
   keyboardDisabledStyle: PropTypes.object,
@@ -242,7 +249,7 @@ PinKeyboard.propTypes = {
   keyTextStyle: PropTypes.object,
   keyImageStyle: PropTypes.object,
   errorStyle: PropTypes.object,
-  errorTextStyle: PropTypes.object
+  errorTextStyle: PropTypes.object,
 };
 
 PinKeyboard.defaultProps = {
@@ -253,76 +260,105 @@ PinKeyboard.defaultProps = {
   // keyboard array will be passed via the keyDown callback.
   // Use this array to set custom functions for certain keys.
   keyboardFunc: null,
-  keyboardErrorDisplayTime: 3000
+  keyboardErrorDisplayTime: 3000,
 };
+const stylesDark = StyleSheet.create({
+  keyTextDefaultStyle: {
+    // ...Platform.select({
+    //   ios: {
+    //     fontFamily: 'HelveticaNeue',
+    //   },
+    //   android: {
+    //     fontFamily: 'Roboto',
+    //   },
+    // }),
+    fontFamily: 'CODE-Bold',
+    fontWeight: '400',
+    fontSize: 20,
+    textAlign: 'center',
+    color: '#FFF',
+  },
+  keyDefaultStyle: {
+    backgroundColor: '#303030',
+    borderColor: '#a5a5a5',
+    borderWidth: 0.5,
+    // borderRightColor: "#e8e8e8",
+    // borderRightWidth: 1,
+    // borderBottomColor: "#e8e8e8",
+    // borderBottomWidth: 1
+  },
+});
 
 const styles = StyleSheet.create({
   containerStyle: {
     flex: null,
-    width: "100%",
-    flexDirection: "column",
-    justifyContent: "flex-end"
+    width: '100%',
+    flexDirection: 'column',
+    justifyContent: 'flex-end',
   },
   // Style applied to the keyboard. Must contain a height or
   // the keyboard will not be displayed.
   keyboardDefaultStyle: {
     height: 250,
-    backgroundColor: "#FFF"
+    backgroundColor: '#FFF',
   },
   keyboardRowStyle: {
     flex: 1,
-    flexDirection: "row"
+    flexDirection: 'row',
   },
   keyContainerStyle: {
     flex: 1,
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center"
+    flexDirection: 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   // Style applied to keyboard when it is disabled.
   keyboardDisabledDefaultStyle: {
-    backgroundColor: "#FFF"
+    backgroundColor: '#FFF',
   },
   // Style the individual keys
   keyDefaultStyle: {
-    backgroundColor: "#FFF",
-    borderRightColor: "#e8e8e8",
-    borderRightWidth: 1,
-    borderBottomColor: "#e8e8e8",
-    borderBottomWidth: 1
+    backgroundColor: '#FFF',
+    borderColor: '#a5a5a5',
+    borderWidth: 0.5,
+    // borderRightColor: "#e8e8e8",
+    // borderRightWidth: 1,
+    // borderBottomColor: "#e8e8e8",
+    // borderBottomWidth: 1
   },
   // Style for the text inside a key
   keyTextDefaultStyle: {
-    ...Platform.select({
-      ios: {
-        fontFamily: "HelveticaNeue"
-      },
-      android: {
-        fontFamily: "Roboto"
-      }
-    }),
-    fontWeight: "400",
-    fontSize: 25,
-    textAlign: "center",
-    color: "#222222"
+    // ...Platform.select({
+    //   ios: {
+    //     fontFamily: 'HelveticaNeue',
+    //   },
+    //   android: {
+    //     fontFamily: 'Roboto',
+    //   },
+    // }),
+    fontFamily: 'CODE-Bold',
+    fontWeight: '400',
+    fontSize: 20,
+    textAlign: 'center',
+    color: '#222',
   },
   // Style for an image inside a key
   keyImageDefaultStyle: {
     width: 28,
-    height: 28
+    height: 28,
   },
   errorDefaultStyle: {
     height: 30,
-    width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "#DA0F72"
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#DA0F72',
   },
   errorTextDefaultStyle: {
-    color: "#FFF",
+    color: '#FFF',
     fontSize: 15,
-    fontWeight: "bold"
-  }
+    fontWeight: 'bold',
+  },
 });
 
 export default PinKeyboard;
